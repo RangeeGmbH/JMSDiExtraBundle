@@ -157,10 +157,10 @@ class ControllerResolver extends BaseControllerResolver
         $config->addPass(new InlineServiceDefinitionsPass());
         $container->compile();
 
-        if (!file_exists($dir = dirname($containerFilename))) {
-            if (false === @mkdir($dir, 0777, true)) {
-                throw new \RuntimeException(sprintf('Could not create directory "%s".', $dir));
-            }
+        $dir = dirname($containerFilename);
+        if (!file_exists($dir) && !@mkdir($dir, 0777, true) && !is_dir($dir)) {
+            exec(sprintf('mkdir -p %s', $dir));
+            //throw new \RuntimeException(sprintf('Could not create directory "%s".', $dir));
         }
 
         static $generator;

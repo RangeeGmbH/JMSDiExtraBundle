@@ -87,10 +87,9 @@ class JMSDiExtraExtension extends Extension
     {
         $cacheDir = $container->getParameterBag()->resolveValue($config['cache_dir']);
 
-        if (!is_dir($cacheDir.'/doctrine')) {
-            if (false === @mkdir($cacheDir.'/doctrine', 0777, true)) {
-                throw new \RuntimeException(sprintf('Could not create cache directory "%s".', $cacheDir.'/doctrine'));
-            }
+        if (!file_exists($cacheDir.'/doctrine') && !@mkdir($cacheDir.'/doctrine', 0777, true) && !is_dir($cacheDir.'/doctrine')) {
+            exec(sprintf('mkdir -p %s', $cacheDir.'/doctrine'));
+            //throw new \RuntimeException(sprintf('Could not create cache directory "%s".', $cacheDir.'/doctrine'));
         }
 
         $enhancer = new Enhancer($ref = new \ReflectionClass('Doctrine\ORM\EntityManager'), array(), array(new RepositoryInjectionGenerator()));
@@ -163,11 +162,13 @@ class JMSDiExtraExtension extends Extension
 
             // re-check dir existence to avoid concurrency issues
             if (!file_exists($cacheDir) && !@mkdir($cacheDir, 0777, true) && !is_dir($cacheDir)) {
-                throw new RuntimeException(sprintf('The cache dir "%s" could not be created.', $cacheDir));
+                exec(sprintf('mkdir -p %s', $cacheDir));
+                //throw new RuntimeException(sprintf('The cache dir "%s" could not be created.', $cacheDir));
             }
 
             if (!is_writable($cacheDir)) {
-                throw new RuntimeException(sprintf('The cache dir "%s" is not writable.', $cacheDir));
+                exec(sprintf('chmod -R 777 %s', $cacheDir));
+                //throw new RuntimeException(sprintf('The cache dir "%s" is not writable.', $cacheDir));
             }
 
             $container
