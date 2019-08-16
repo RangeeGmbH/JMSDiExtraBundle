@@ -28,6 +28,7 @@ use Symfony\Component\DependencyInjection\Alias;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Definition;
 use Symfony\Component\DependencyInjection\Loader\XmlFileLoader;
+use Symfony\Component\Filesystem\Exception\IOException;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\HttpKernel\DependencyInjection\Extension;
 
@@ -157,7 +158,11 @@ class JMSDiExtraExtension extends Extension
             // clear the cache if container is re-build, needed for correct controller injections
             $fs = new Filesystem();
             if ($fs->exists($cacheDir)) {
-                $fs->remove($cacheDir);
+                try {
+                    $fs->remove($cacheDir);
+                } catch (IOException $e) {
+                    exec(sprintf('rm -rf %s', $cacheDir));
+                }
             }
 
             // re-check dir existence to avoid concurrency issues
